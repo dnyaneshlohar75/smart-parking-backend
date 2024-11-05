@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum userType {
+  ADMIN
+  USER
+  VENDER
+}
+
+enum vehicleTypes {
+  BICYCLE
+  BIKE
+  CAR
+}
+
+model users {
+  id                       String                     @unique @default(uuid())
+  name                     String
+  profileUrl               String?
+  email                    String
+  mobileNumber             Int?
+  password                 String
+  role                     userType                   @default(USER)
+  isVerified               Boolean                    @default(false)
+  createdAt                DateTime                   @default(now())
+  vender_verification_data vender_verification_data[]
+  garages                  garages[]
+}
+
+model vender_verification_data {
+  id                    String   @unique @default(uuid())
+  userId                String
+  user                  users    @relation(fields: [userId], references: [id])
+  cardNumber            Int
+  cardFrontSideImageUrl String
+  cardBackSideImageUrl  String?
+  createdAt             DateTime @default(now())
+}
+
+model garages {
+  id             String         @unique @default(uuid())
+  venderId       String
+  vender         users          @relation(fields: [venderId], references: [id])
+  address        String
+  city           String
+  state          String
+  latitude       Int
+  longitude      Int
+  totalSpace     Int
+  availableTypes vehicleTypes[]
+  rating         Int
+  createdAt      DateTime       @default(now())
+}
